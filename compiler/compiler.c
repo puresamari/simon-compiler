@@ -114,39 +114,34 @@ int main(int argc, char **argv)
   }
 
   fprintf(fptr, ".global _start\n");
+  fprintf(fptr, ".align 4\n\n");
 
-  fprintf(fptr, ".section __DATA,__data\n");
-
-  for (int i = 0; i < variablesCount; i++)
-  {
-    fprintf(fptr, "  var_%d:      .asciz \"%s\"\n", i, variables[i]);
-  }
-
-  fprintf(fptr, ".section __TEXT,__text\n");
   fprintf(fptr, "_start:\n");
-
-  fprintf(fptr, "  mov x8, 0x1\n");
 
   for (int i = 0; i < instructionsCount; i++)
   {
     if (strcmp(instructions[i].instruction, "says") == 0)
     {
       fprintf(fptr, "  // print var var_%zu\n", instructions[i].variableIndex);
+      fprintf(fptr, "  mov	x0, #1\n");
       // pointer to the string
-      fprintf(fptr, "  ldr x1, =var_%zu\n", instructions[i].variableIndex);
+      fprintf(fptr, "  adr	X1, var_%zu\n", instructions[i].variableIndex);
       // length of the string
-      fprintf(fptr, "  ldr x2, =%lu\n", strlen(variables[instructions[i].variableIndex]) + 1);
+      fprintf(fptr, "  mov	X2, #%lu\n", strlen(variables[instructions[i].variableIndex]) + 1);
 
-      fprintf(fptr, "  mov x0, 0x1\n");
-      fprintf(fptr, "  mov x16, 0x80\n");
-      fprintf(fptr, "  svc 0x80\n\n");
+      fprintf(fptr, "  mov	X16, #4\n");
+      fprintf(fptr, "  svc	#0x80\n\n");
     }
   }
 
-  fprintf(fptr, "  mov x8, 0x1\n");
-  fprintf(fptr, "  mov x0, 0\n");
-  fprintf(fptr, "  mov x16, 0x80\n");
-  fprintf(fptr, "  svc 0x80\n");
+  fprintf(fptr, "  mov x0, #0\n");
+  fprintf(fptr, "  mov x16, #1\n");
+  fprintf(fptr, "  svc #0x80\n\n");
+
+  for (int i = 0; i < variablesCount; i++)
+  {
+    fprintf(fptr, "var_%d:      .ascii \"%s\\n\"\n", i, variables[i]);
+  }
 
   fclose(fp);
   fclose(fptr);
