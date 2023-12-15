@@ -1,12 +1,10 @@
-// interpreter.h
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
+
 #include "helpers.h"
 
 typedef struct
