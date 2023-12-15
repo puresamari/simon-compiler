@@ -8,3 +8,4 @@ To compile you need to:
 TODO:
 - Automatically create the dirs that are referenced in the params
 - Don't generate .s and .o files
+- Fix workflow for windows
