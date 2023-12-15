@@ -1,10 +1,17 @@
+# Create a build directory (recommended to keep the source directory clean)
+mkdir build
+cd build
+
+# Generate build files with CMake
+cmake ..
+
+# Build the project
+make
+
+# Test build
 rm -rf ./dist
 mkdir ./dist
-
-gcc -o ./dist/compiler ./compiler/main.c ./compiler/helpers.c ./compiler/interpreter.c ./compiler/writer.c
-# clang ./compiler/main.c -o ./dist/compiler
-
-./dist/compiler ./test/test.simon ./dist/test-out-binary
+./bin/compiler ../test/test.simon ./dist/test-out-binary
 
 # Assemble the code
 as -arch arm64 -o ./dist/test-out-binary.o ./dist/test-out-binary.s
