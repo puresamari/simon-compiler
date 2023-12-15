@@ -1,7 +1,8 @@
 rm -rf ./dist
 mkdir ./dist
 
-clang ./compiler/compiler.c -o ./dist/compiler
+gcc -o ./dist/compiler ./compiler/main.c ./compiler/helpers.c ./compiler/interpreter.c ./compiler/writer.c
+# clang ./compiler/main.c -o ./dist/compiler
 
 ./dist/compiler ./test/test.simon ./dist/test-out-binary
 
