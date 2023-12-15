@@ -1,3 +1,11 @@
+// This whole include and ifndef shit is annoying but i'm too stupid to do this differently
+#include <stddef.h>
+
+#ifndef _SSIZE_T_DEFINED
+#define _SSIZE_T_DEFINED
+typedef ptrdiff_t ssize_t;
+#endif
+
 #include "interpreter.h"
 
 InterpretationResult interpret(const char *inputFile) {
