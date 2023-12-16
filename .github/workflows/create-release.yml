@@ -28,6 +28,9 @@ jobs:
           - os: ubuntu-latest
             c_compiler: cl
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
