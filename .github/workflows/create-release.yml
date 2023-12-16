@@ -71,5 +71,4 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: build-artifacts
           path: ${{ steps.strings.outputs.build-output-dir }}
