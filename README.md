@@ -6,6 +6,7 @@ To compile you need to:
 - And to finish off, link the code and libraries: `ld -arch arm64 -e _start -o ./test-out-binary ./test-out-binary.o -lSystem -syslibroot `xcrun -sdk macosx --show-sdk-path` -e _start -arch arm64`
 
 TODO:
+- Add a proper release notes and version management system
 - Automatically create the dirs that are referenced in the params
 - Don't generate .s and .o files
 - Fix workflow for windows
