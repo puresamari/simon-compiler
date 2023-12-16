@@ -59,3 +59,12 @@ jobs:
         with:
           name: build-artifacts
           path: ${{ steps.strings.outputs.build-output-dir }}
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+          path: ${{ github.workspace }}/build
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
