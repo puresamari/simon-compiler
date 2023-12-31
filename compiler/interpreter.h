@@ -9,9 +9,17 @@
 
 typedef struct
 {
-    char *instruction;
+    // There should be a struct somewhere that contains a reference to the lib and function
+    char *library;
+    char *function;
     size_t variableIndex;
 } Instruction;
+
+typedef struct
+{
+    char *instruction;
+    size_t variableIndex;
+} FunctionCompiler;
 
 typedef struct
 {

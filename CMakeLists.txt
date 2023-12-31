@@ -8,6 +8,7 @@ set(CMAKE_C_STANDARD 11)
 add_executable(compiler
     compiler/main.c
     compiler/helpers.c
+    compiler/library_manager.c
     compiler/interpreter.c
     compiler/writer.c
 )

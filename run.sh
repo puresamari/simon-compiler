@@ -9,12 +9,13 @@ cmake ..
 make
 
 # Test build
+
 rm -rf ./dist
 mkdir ./dist
 ./bin/compiler ../test/test.simon ./dist/test-out-binary
 
 # Assemble the code
-as -arch arm64 -o ./dist/test-out-binary.o ./dist/test-out-binary.s
+as -arch arm64 -o ./dist/test-out-binary.o ./dist/test-out-binary.s -g
 
 # Link the code
 ld -arch arm64 -e _start -o ./dist/test-out-binary ./dist/test-out-binary.o -lSystem -syslibroot `xcrun -sdk macosx --show-sdk-path` -e _start -arch arm64

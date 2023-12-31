@@ -8,5 +8,6 @@
 
 int startsWith(const char *str, const char *prefix);
 char *substring(const char *str, int start, int length);
+void stripNewline(char *str);
 
 #endif

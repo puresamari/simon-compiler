@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "library_manager.h": "c",
+    "interpreter.h": "c"
+  }
+}
