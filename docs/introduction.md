@@ -2,6 +2,10 @@
 
 ## Basic syntax
 
+### Comments
+
+If a line starts with `//` it is interpreted as a comment and ignored.
+
 ### Instructions
 
 Each line in simonlang is considered an instruction. The instruction is written like a sentence 
