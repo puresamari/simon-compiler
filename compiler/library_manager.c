@@ -1,13 +1,15 @@
 #include "library_manager.h"
+#include "helpers.h"
 #include <stdio.h>
 
 LoadedLibraryFunction *functions = NULL;
 int functionsCount = 0;
 
+// Function pointer type definition
+typedef char *(*LibraryAssemblyFN)();
+
 void load(char *library, char *function)
 {
-  printf("Loading library '%s' and the function '%s'\n", library, function);
-
   // I know this inefficient and ugly
   for (int i = 0; i < functionsCount; i++)
   {
@@ -19,6 +21,7 @@ void load(char *library, char *function)
     printf("Does not match: %s %s\n", functions[i].library, functions[i].name);
   }
 
+  printf("Loading library '%s' and the function '%s'\n", library, function);
   functions = (LoadedLibraryFunction *)realloc(functions, (functionsCount + 1) * sizeof(LoadedLibraryFunction));
 
   if (functions == NULL)
@@ -27,25 +30,29 @@ void load(char *library, char *function)
     exit(1);
   }
 
-  // This is an example for printing, TODO: actually pull it from C
+  // Todo: somehow keep the libraries in memory if not all functions have been loaded to optimize compiler time
+  const char *libPath = concatStrings(4, getExecutablePath(), "/libraries/lib", library, ".dylib");
 
-  // x0 holds the value and x1 holds the length
-  functions[functionsCount].assembly =
-      // Push x0 and x1 onto the stack to preserve em
-      "stp x0, x1, [sp, #-16]!\n"
+  void *handle = dlopen(libPath, RTLD_LAZY);
+  if (!handle)
+  {
+    fprintf(stderr, "Error opening library: %s\n", dlerror());
+    return;
+  }
 
-      // Set up arguments for the write syscall
-      "mov x0, #1\n"       // File descriptor for stdout
-      "ldr x1, [sp]\n"     // Load the value (pointer to string) from stack
-      "ldr x2, [sp, #8]\n" // Load the length from stack
+  LibraryAssemblyFN getFunction = (LibraryAssemblyFN)dlsym(handle, concatStrings(2, "function_", function));
+  if (!getFunction)
+  {
+    fprintf(stderr, "Error loading function: %s\n", dlerror());
+    dlclose(handle);
+    return;
+  }
 
-      // Perform the write syscall
-      "mov x16, #4\n" // System call number for 'write' in ARM64
-      "svc #0x80\n"
+  char *assemblyCode = getFunction();
+  functions[functionsCount].assembly = malloc(strlen(assemblyCode) * sizeof(char *));
+  strcpy(functions[functionsCount].assembly, assemblyCode);
 
-      // Restore x0 and x1 values from the stack
-      "ldp x0, x1, [sp], #16\n"
-      "ret\n";
+  dlclose(handle);
 
   functions[functionsCount].library = library;
   functions[functionsCount].name = function;

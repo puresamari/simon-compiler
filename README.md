@@ -14,6 +14,11 @@ $ as -arch arm64 -o ./test-out-binary.o ./test-out-binary.s
 $ ld -arch arm64 -e _start -o ./test-out-binary ./test-out-binary.o -lSystem -syslibroot `xcrun -sdk macosx --show-sdk-path` -e _start -arch arm64
 ```
 
+# Docs
+
+- [Libraries](./docs/libraries.md)
+- [Standard library / Simon Library](./libraries/simon/README.md)
+
 TODO:
 - Add a proper release notes and version management system
 - Automatically create the dirs that are referenced in the params

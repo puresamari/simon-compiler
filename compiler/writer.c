@@ -7,13 +7,13 @@ void writeData(InterpretationResult results, FILE *fptr)
     fprintf(fptr,
             ".align 2\n"
             "var_%d: .ascii \"%s\\n\"\n",
-            i, results.variables[i], i, (i == 0) ? 15 : 21);
+            i, results.variables[i]);
   }
 
   fprintf(fptr, "\n");
 }
 
-void write(InterpretationResult results, const char *outputAssemblyFile)
+void writeFile(InterpretationResult results, const char *outputAssemblyFile)
 {
   printf("Writing out assembly file...\n");
 

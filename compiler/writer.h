@@ -5,6 +5,6 @@
 #include "interpreter.h"
 #include "library_manager.h"
 
-void write(InterpretationResult results, const char *outputAssemblyFile);
+void writeFile(InterpretationResult results, const char *outputAssemblyFile);
 
 #endif

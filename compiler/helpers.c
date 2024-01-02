@@ -29,3 +29,52 @@ void stripNewline(char *str)
     str[len - 1] = '\0'; // Replace newline with null terminator
   }
 }
+
+char *concatStrings(int num, ...)
+{
+  va_list args;
+  int length = 0;
+
+  // Initialize the va_list and calculate the total length
+  va_start(args, num);
+  for (int i = 0; i < num; ++i)
+  {
+    length += strlen(va_arg(args, char *));
+  }
+  va_end(args);
+
+  // Allocate memory for the concatenated string
+  char *result = malloc(length + 1);
+  if (result == NULL)
+  {
+    perror("Unable to allocate memory for the concatenated string");
+    exit(1);
+  }
+  result[0] = '\0'; // Set the first character to the null terminator
+
+  // Concatenate the strings
+  va_start(args, num);
+  for (int i = 0; i < num; ++i)
+  {
+    strcat(result, va_arg(args, char *));
+  }
+  va_end(args);
+
+  return result;
+}
+
+char *getExecutablePath()
+{
+  char path[PATH_MAX];
+  uint32_t size = sizeof(path);
+
+  if (_NSGetExecutablePath(path, &size) != 0)
+  {
+    fprintf(stderr, "Buffer too small; need size %u\n", size);
+    return "";
+  }
+
+  char *dir = dirname(path);
+
+  return dir;
+}
