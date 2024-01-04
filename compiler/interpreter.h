@@ -9,27 +9,41 @@
 
 typedef struct
 {
-    // There should be a struct somewhere that contains a reference to the lib and function
+    /**
+     * 0 = variable
+     * 1 = string
+     */
+    int type;
+
+    int variable;
+    char *string;
+} InstructionParameter;
+
+typedef struct
+{
+    /**
+     * 0 = external lib call
+     * 1 = declaration
+     */
+    int type;
+    InstructionParameter *params;
+    size_t paramsCount;
+
+    char **variables;
+    size_t variablesCount;
+
+    // Only relevant for library instructions
     char *library;
     char *function;
-    size_t variableIndex;
 } Instruction;
 
 typedef struct
 {
-    char *instruction;
-    size_t variableIndex;
-} FunctionCompiler;
-
-typedef struct
-{
-    char **variables;
-    size_t variablesCount;
-
     Instruction *instructions;
     size_t instructionsCount;
 } InterpretationResult;
 
 InterpretationResult interpret(const char *inputFile);
+InterpretationResult getVariables(InterpretationResult result, int step);
 
 #endif

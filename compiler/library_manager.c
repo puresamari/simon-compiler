@@ -8,16 +8,13 @@ int functionsCount = 0;
 // Function pointer type definition
 typedef char *(*LibraryAssemblyFN)();
 
-void load(char *library, char *function)
+void loadLibrary(char *library, char *function)
 {
   // I know this inefficient and ugly
   for (int i = 0; i < functionsCount; i++)
   {
     if (strcmp(functions[i].library, library) == 0 && strcmp(functions[i].name, function) == 0)
-    {
-      printf("Library is already loaded\n");
       return;
-    }
     printf("Does not match: %s %s\n", functions[i].library, functions[i].name);
   }
 

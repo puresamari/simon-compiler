@@ -9,73 +9,87 @@ typedef ptrdiff_t ssize_t;
 #include "interpreter.h"
 #include "library_manager.h"
 
-void readLine(char *line, InterpretationResult *result)
+void determineInstructionTokenType(char *token, InterpretationResult *result, Instruction *instruction)
 {
-  // Ignore comments
-  if (startsWith(line, "//"))
+  // Declares variable
+  if (strcmp(token, "declare") == 0)
+    instruction->type = 1;
+  // If not a primitive function, it defaults to library
+  else
+    instruction->type = 0;
+}
+
+void tokenizeLine(char *line, InterpretationResult *result)
+{
+  char *token = strtok(line, " ");
+  if (token == NULL)
     return;
 
-  char *library = NULL;
-  char *function = NULL;
-  char *params = NULL;
+  // Tokenize the first token in the line
 
-  char *token = strtok(line, " ");
-  while (token != NULL)
+  // Ignore comments
+  if (strcmp(token, "//") == 0)
+    return;
+
+  Instruction instruction = {.variablesCount = 0};
+  determineInstructionTokenType(token, result, &instruction);
+
+  int tokenIndex = 0;
+  switch (instruction.type)
   {
-    if (library == NULL)
+  case 0:
+    while (token != NULL)
     {
-      library = malloc(sizeof(char) * (strlen(token) + 1));
-      strcpy(library, token);
+      switch (tokenIndex)
+      {
+      case 0:
+        instruction.library = malloc(sizeof(char) * (strlen(token) + 1));
+        strcpy(instruction.library, token);
+        break;
+      case 1:
+        instruction.function = malloc(sizeof(char) * (strlen(token) + 1));
+        strcpy(instruction.function, token);
+        break;
+      // TODO: Don't assume the parameters are strings
+      default:
+        if (instruction.params == NULL)
+        {
+          instruction.params = malloc(sizeof(InstructionParameter));
+          instruction.params[0].type = 1;
+          instruction.params[0].string = malloc(sizeof(char) * (strlen(token) + 1));
+          strcpy(instruction.params[0].string, token);
+          instruction.paramsCount = 1;
+        }
+        // This is all a bit stupid
+        else
+        {
+          char *n = concatStrings(3, instruction.params[0].string, " ", token);
+          instruction.params[0].string = malloc(sizeof(char) * (strlen(n) + 1));
+          strcpy(instruction.params[0].string, n);
+        }
+      }
+      token = strtok(NULL, " ");
+      tokenIndex++;
     }
-    else if (function == NULL)
-    {
-      function = malloc(sizeof(char) * (strlen(token) + 1));
-      strcpy(function, token);
-    }
-    else if (params == NULL)
-    {
-      params = malloc(sizeof(char) * (strlen(token) + 1));
-      strcpy(params, token);
-    }
-    else
-    {
-      // This is all a bit stupid
-      char *n = NULL;
-      n = malloc(sizeof(char) * (strlen(params) + 1));
-      strcpy(n, params);
+    loadLibrary(instruction.library, instruction.function);
 
-      params = malloc(sizeof(char) * (strlen(token) + strlen(n) + 2));
-      strcat(params, n);
-      strcat(params, " ");
-      strcat(params, token);
-      stripNewline(params);
+    // Resize the array to accommodate the new instruction
+    result->instructions = (Instruction *)realloc(result->instructions, (result->instructionsCount + 1) * sizeof(Instruction));
+
+    // Check if memory allocation is successful
+    if (result->instructions == NULL)
+    {
+      fprintf(stderr, "Memory allocation failed\n");
+      exit(1);
     }
-    token = strtok(NULL, " ");
+    break;
+  // Declaration
+  case 1:
+    printf("! Variable declaration is not implemented yet !\n");
+    return;
   }
 
-  load(library, function);
-
-  // Resize the array to accommodate the new string
-  result->variables = (char **)realloc(result->variables, (result->variablesCount + 1) * sizeof(char *));
-
-  // Add the new string to the array
-  result->variables[result->variablesCount] = params;
-  result->variablesCount++;
-
-  // Resize the array to accommodate the new instruction
-  result->instructions = (Instruction *)realloc(result->instructions, (result->instructionsCount + 1) * sizeof(Instruction));
-
-  // Check if memory allocation is successful
-  if (result->instructions == NULL)
-  {
-    fprintf(stderr, "Memory allocation failed\n");
-    exit(1);
-  }
-
-  // Set the values for the new instruction
-  result->instructions[result->instructionsCount].library = library;
-  result->instructions[result->instructionsCount].function = function;
-  result->instructions[result->instructionsCount].variableIndex = result->variablesCount - 1;
+  result->instructions[result->instructionsCount] = instruction;
 
   result->instructionsCount++;
 }
@@ -84,7 +98,7 @@ InterpretationResult interpret(const char *inputFile)
 {
 
   printf("Interpreting file \"%s\"...\n", inputFile);
-  InterpretationResult result = {.variablesCount = 0, .instructionsCount = 0};
+  InterpretationResult result = {.instructionsCount = 0};
 
   FILE *fp = fopen(inputFile, "r");
   if (fp == NULL)
@@ -101,7 +115,8 @@ InterpretationResult interpret(const char *inputFile)
   while ((read = getline(&line, &len, fp)) != -1)
   {
     char *newString = strdup(line);
-    readLine(newString, &result);
+    stripNewline(newString);
+    tokenizeLine(newString, &result);
     free(newString);
   }
 

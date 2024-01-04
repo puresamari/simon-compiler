@@ -17,3 +17,7 @@ the first part of the instruction is the library that is being used, i.e. the st
 #### Function
 
 the second part of the instruction is the function that is being used, i.e. the standard library is called `simon`
+
+## Libraries
+
+- The [standard library](../libraries/simon/) (named simon) contains the basic functionallities you'll need, such as declaring variables and printing

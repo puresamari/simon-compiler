@@ -24,7 +24,7 @@ typedef struct
   char *assembly;
 } LoadedLibraryFunction;
 
-void load(char *library, char *function);
+void loadLibrary(char *library, char *function);
 char *build();
 
 #endif // LIBRARY_H
