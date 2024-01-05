@@ -25,6 +25,6 @@ typedef struct
 } LoadedLibraryFunction;
 
 void loadLibrary(char *library, char *function);
-char *build();
+void buildToFile(FILE *fptr);
 
 #endif // LIBRARY_H

@@ -14,6 +14,7 @@
 int startsWith(const char *str, const char *prefix);
 char *substring(const char *str, int start, int length);
 void stripNewline(char *str);
+void append(char **val, const char *string);
 char *concatStrings(int num, ...);
 char *getExecutablePath();
 

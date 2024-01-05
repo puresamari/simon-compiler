@@ -19,7 +19,7 @@ int main(int argc, char **argv)
   printf("Simonlang compiler\n - in:      %s\n - out asm: %s\n", inputFile, outputAssemblyFile);
 
   // Go through lines in file
-  InterpretationResult results = interpret(inputFile);
+  const InterpretationResult results = interpret(inputFile);
 
   writeFile(results, outputAssemblyFile);
 

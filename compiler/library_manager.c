@@ -57,78 +57,15 @@ void loadLibrary(char *library, char *function)
   functionsCount++;
 }
 
-char *normalizeAssembly(const char *input)
+void buildToFile(FILE *fptr)
 {
-  size_t inputLength = strlen(input);
-
-  char *modifiedString = (char *)malloc((inputLength * 3) + 1);
-
-  if (modifiedString != NULL)
-  {
-    size_t j = 0;
-
-    for (size_t i = 0; i < inputLength; i++)
-    {
-      if (input[i] == '\n')
-      {
-        modifiedString[j++] = '\n';
-        modifiedString[j++] = ' ';
-        modifiedString[j++] = ' ';
-      }
-      else
-      {
-        modifiedString[j++] = input[i];
-      }
-    }
-
-    modifiedString[j] = '\0';
-  }
-
-  return modifiedString;
-}
-
-char *build()
-{
-  char *output = (char *)malloc(1000);
-
-  if (output == NULL)
-  {
-    printf("Memory allocation for library build output failed\n");
-    return NULL;
-  }
-
-  strcpy(output, "// Functions loaded from their libraries: \n");
-
+  fprintf(fptr, "// Functions loaded from their libraries: \n");
   for (int i = 0; i < functionsCount; i++)
   {
-
-    char *nAssembly = normalizeAssembly(functions[i].assembly);
-    char *fnOut = (char *)malloc(
-        sizeof(char) * (strlen(functions[i].library) +
-                        strlen(functions[i].name) +
-                        strlen(nAssembly) +
-                        strlen("// From library '':\n_:\n  \n") + 1));
-
-    if (fnOut != NULL)
-    {
-
-      sprintf(fnOut,
-              "// From library '%s':\n.text\n.align 4\n_%s_%s:\n  %s\n",
-              functions[i].library,
-              functions[i].library,
-              functions[i].name,
-              nAssembly);
-
-      output = (char *)realloc(output, strlen(output) + strlen(fnOut) + 1);
-      strcat(output, fnOut);
-
-      free(fnOut);
-    }
-    else
-    {
-      printf("Memory allocation in lib builder failed\n");
-    }
+    fprintf(fptr, "// From library '%s':\n.text\n.align 4\n_%s_%s:\n  %s\n",
+            functions[i].library,
+            functions[i].library,
+            functions[i].name,
+            functions[i].assembly);
   }
-
-  return output;
 }

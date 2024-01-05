@@ -19,6 +19,57 @@ void determineInstructionTokenType(char *token, InterpretationResult *result, In
     instruction->type = 0;
 }
 
+void addToken(char **val, const char *token)
+{
+  size_t new_len;
+  if (*val == NULL)
+  {
+    new_len = strlen(token) + 1;
+    *val = malloc(new_len);
+  }
+  else
+  {
+    new_len = strlen(*val) + strlen(token) + 2;
+    *val = realloc(*val, new_len);
+    strcat(*val, " ");
+  }
+
+  if (*val == NULL)
+  {
+    perror("Failed to allocate memory in addToken");
+    return;
+  }
+
+  strcat(*val, token);
+}
+
+void addVariableToInstruction(Instruction *instruction, const char *variable, const char *value)
+{
+  char *nameCopy = strdup(variable);
+  char *valueCopy = strdup(value);
+
+  if (nameCopy == NULL || valueCopy == NULL)
+  {
+    perror("Failed to allocate memory for strings");
+    free(nameCopy); // Safe to call free on NULL
+    free(valueCopy);
+    return;
+  }
+
+  InstructionVariable *newVariables = realloc(instruction->variables, (instruction->variablesCount + 1) * sizeof(InstructionVariable));
+  if (newVariables == NULL)
+  {
+    perror("Failed to reallocate memory");
+    free(nameCopy);
+    free(valueCopy);
+    return;
+  }
+
+  instruction->variables = newVariables;
+  InstructionVariable var = {.name = nameCopy, .value = valueCopy};
+  instruction->variables[instruction->variablesCount++] = var;
+}
+
 void tokenizeLine(char *line, InterpretationResult *result)
 {
   char *token = strtok(line, " ");
@@ -31,7 +82,8 @@ void tokenizeLine(char *line, InterpretationResult *result)
   if (strcmp(token, "//") == 0)
     return;
 
-  Instruction instruction = {.variablesCount = 0};
+  Instruction instruction = {
+      .variablesCount = 0};
   determineInstructionTokenType(token, result, &instruction);
 
   int tokenIndex = 0;
@@ -73,6 +125,17 @@ void tokenizeLine(char *line, InterpretationResult *result)
     }
     loadLibrary(instruction.library, instruction.function);
 
+    if (instruction.library == NULL || instruction.function == NULL || (instruction.params != NULL && instruction.params[0].string == NULL))
+    {
+      fprintf(stderr, "Memory allocation failed in tokenizeLine\n");
+      // Free allocated memory
+      free(instruction.library);
+      free(instruction.function);
+      free(instruction.params[0].string);
+      free(instruction.params);
+      return;
+    }
+
     // Resize the array to accommodate the new instruction
     result->instructions = (Instruction *)realloc(result->instructions, (result->instructionsCount + 1) * sizeof(Instruction));
 
@@ -85,18 +148,44 @@ void tokenizeLine(char *line, InterpretationResult *result)
     break;
   // Declaration
   case 1:
-    printf("! Variable declaration is not implemented yet !\n");
-    return;
+  {
+    token = strtok(NULL, " ");
+    char *declaredVariableName = NULL;
+    char *declaredVariableValue = NULL;
+    /**
+     * 0 = cumulating the variable name
+     * 1 = cumulating the initial value
+     */
+    int dectectionPhase = 0;
+    while (token != NULL)
+    {
+      if (strcmp(token, "is") == 0)
+        dectectionPhase++;
+
+      switch (dectectionPhase)
+      {
+      case 0:
+        addToken(&declaredVariableName, token);
+        break;
+      case 1:
+        addToken(&declaredVariableValue, token);
+        break;
+      }
+
+      token = strtok(NULL, " ");
+      tokenIndex++;
+    }
+    addVariableToInstruction(&instruction, declaredVariableName, declaredVariableValue);
+    break;
+  }
   }
 
   result->instructions[result->instructionsCount] = instruction;
-
   result->instructionsCount++;
 }
 
 InterpretationResult interpret(const char *inputFile)
 {
-
   printf("Interpreting file \"%s\"...\n", inputFile);
   InterpretationResult result = {.instructionsCount = 0};
 
@@ -104,7 +193,6 @@ InterpretationResult interpret(const char *inputFile)
   if (fp == NULL)
   {
     fprintf(stderr, "Error opening file\n");
-    fclose(fp);
     return result;
   }
 
@@ -115,12 +203,17 @@ InterpretationResult interpret(const char *inputFile)
   while ((read = getline(&line, &len, fp)) != -1)
   {
     char *newString = strdup(line);
+    if (newString == NULL)
+    {
+      perror("Failed to duplicate line");
+      continue;
+    }
     stripNewline(newString);
     tokenizeLine(newString, &result);
     free(newString);
   }
 
+  free(line);
   fclose(fp);
-
   return result;
 }

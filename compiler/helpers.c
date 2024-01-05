@@ -63,6 +63,14 @@ char *concatStrings(int num, ...)
   return result;
 }
 
+void append(char **val, const char *string)
+{
+  char *n = concatStrings(2, *val, string);
+  printf("joining '%s' '%s' into '%s'\n", *val, string, n);
+  free(*val);
+  *val = n;
+}
+
 char *getExecutablePath()
 {
   char path[PATH_MAX];

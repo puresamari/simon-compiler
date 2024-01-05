@@ -2,20 +2,10 @@
 
 void writeData(InterpretationResult results, FILE *fptr)
 {
-  // for (int i = 0; i < results.variablesCount; i++)
-  // {
-  //   fprintf(fptr,
-  //           ".align 2\n"
-  //           "var_%d: .ascii \"%s\\n\"\n",
-  //           i, results.variables[i]);
-  // }
-
   for (int i = 0; i < results.instructionsCount; i++)
   {
-
     for (int pI = 0; pI < results.instructions[i].paramsCount; pI++)
     {
-      // results.instructions[i].variablesCount;
       switch (results.instructions[i].params[pI].type)
       {
       // param is a variable
@@ -31,6 +21,15 @@ void writeData(InterpretationResult results, FILE *fptr)
                 results.instructions[i].params[pI].string);
         break;
       }
+    }
+
+    for (int vI = 0; vI < results.instructions[i].variablesCount; vI++)
+    {
+      fprintf(fptr,
+              ".align 2\n"
+              "var_%s: .ascii \"%s\"\n",
+              results.instructions[i].variables[vI].name,
+              results.instructions[i].variables[vI].value);
     }
   }
   fprintf(fptr, "\n");
@@ -51,23 +50,17 @@ void writeFile(InterpretationResult results, const char *outputAssemblyFile)
   fprintf(fptr,
           ".global _start\n"
           ".align 2\n\n");
-
-  fprintf(fptr, "%s", build());
-
+  buildToFile(fptr);
   fprintf(fptr, "_start:\n");
 
   for (int i = 0; i < results.instructionsCount; i++)
   {
-
-    fprintf(fptr, "  // Prepare to call %s\n", results.instructions[i].function);
-
     for (int vI = 0; vI < results.instructions[i].variablesCount; vI++)
     {
-      // results.instructions[i].variablesCount;
-      // fprintf(fptr,
-      //         ".align 2\n"
-      //         "var_%s: .ascii ",
-      //         results.instructions[i].variables[vI]);
+      fprintf(fptr,
+              "  // initializing 'var_%s' with value \"%s\"\n",
+              results.instructions[i].variables[vI].name,
+              results.instructions[i].variables[vI].value);
     }
 
     int reg = 0;
@@ -75,15 +68,13 @@ void writeFile(InterpretationResult results, const char *outputAssemblyFile)
     {
     // external lib call
     case 0:
+      fprintf(fptr, "  // Prepare to call %s\n", results.instructions[i].function);
       // The incremental register
       for (int pI = 0; pI < results.instructions[i].paramsCount; pI++)
       {
         // results.instructions[i].variablesCount;
         switch (results.instructions[i].params[pI].type)
         {
-        // param is a variable
-        case 0:
-          break;
         // param is a string
         case 1:
           fprintf(fptr,
@@ -96,15 +87,15 @@ void writeFile(InterpretationResult results, const char *outputAssemblyFile)
                   strlen(results.instructions[i].params[pI].string) + 1);
           reg += 2;
           break;
+        default:
+          printf("Using %d types in parameters is not implemented yet\n", results.instructions[i].params[pI].type);
+          break;
         }
       }
       fprintf(fptr,
               "  bl _%s_%s\n\n",
               results.instructions[i].library,
               results.instructions[i].function);
-      break;
-    // declaration
-    case 1:
       break;
     }
   }

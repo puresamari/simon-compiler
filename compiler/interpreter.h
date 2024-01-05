@@ -21,6 +21,13 @@ typedef struct
 
 typedef struct
 {
+    char *name;
+    // This should be possible to be of other types aswell
+    char *value;
+} InstructionVariable;
+
+typedef struct
+{
     /**
      * 0 = external lib call
      * 1 = declaration
@@ -29,7 +36,7 @@ typedef struct
     InstructionParameter *params;
     size_t paramsCount;
 
-    char **variables;
+    InstructionVariable *variables;
     size_t variablesCount;
 
     // Only relevant for library instructions

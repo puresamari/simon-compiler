@@ -22,6 +22,8 @@ $ ld -arch arm64 -e _start -o ./test-out-binary ./test-out-binary.o -lSystem -sy
 TODO:
 - Add a proper release notes and version management system
 - Automatically create the dirs that are referenced in the params
-- Don't generate .s and .o files
+- Instead of transpiling interpretation results into assembly files, it should
+  - Compile the interpretation result into binary machine code
+  - Package them into an object file (ELF) that can be linked directly
 - Fix workflow for windows
 - Implement the full language capabilities
