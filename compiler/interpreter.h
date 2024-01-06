@@ -21,10 +21,17 @@ typedef struct
 
 typedef struct
 {
+    /**
+     * 0 = int
+     * 1 = string
+     */
+    int type;
+
+    int identifier;
     char *name;
     // This should be possible to be of other types aswell
-    char *value;
-} InstructionVariable;
+    char *initialValue;
+} InterpretationVariable;
 
 typedef struct
 {
@@ -33,11 +40,9 @@ typedef struct
      * 1 = declaration
      */
     int type;
+
     InstructionParameter *params;
     size_t paramsCount;
-
-    InstructionVariable *variables;
-    size_t variablesCount;
 
     // Only relevant for library instructions
     char *library;
@@ -48,9 +53,11 @@ typedef struct
 {
     Instruction *instructions;
     size_t instructionsCount;
+
+    InterpretationVariable *variables;
+    size_t variablesCount;
 } InterpretationResult;
 
 InterpretationResult interpret(const char *inputFile);
-InterpretationResult getVariables(InterpretationResult result, int step);
 
 #endif

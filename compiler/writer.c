@@ -22,17 +22,16 @@ void writeData(InterpretationResult results, FILE *fptr)
         break;
       }
     }
-
-    for (int vI = 0; vI < results.instructions[i].variablesCount; vI++)
-    {
-      fprintf(fptr,
-              ".align 2\n"
-              "var_%s: .ascii \"%s\"\n",
-              results.instructions[i].variables[vI].name,
-              results.instructions[i].variables[vI].value);
-    }
   }
-  fprintf(fptr, "\n");
+
+  for (int vI = 0; vI < results.variablesCount; vI++)
+  {
+    fprintf(fptr,
+            ".align 2\n"
+            "var_%d: .ascii \"%s\"\n",
+            results.variables[vI].identifier,
+            results.variables[vI].initialValue);
+  }
 }
 
 void writeFile(InterpretationResult results, const char *outputAssemblyFile)
@@ -55,13 +54,13 @@ void writeFile(InterpretationResult results, const char *outputAssemblyFile)
 
   for (int i = 0; i < results.instructionsCount; i++)
   {
-    for (int vI = 0; vI < results.instructions[i].variablesCount; vI++)
-    {
-      fprintf(fptr,
-              "  // initializing 'var_%s' with value \"%s\"\n",
-              results.instructions[i].variables[vI].name,
-              results.instructions[i].variables[vI].value);
-    }
+    // for (int vI = 0; vI < results.instructions[i].variablesCount; vI++)
+    // {
+    //   fprintf(fptr,
+    //           "  // initializing 'var_%s' with value \"%s\"\n",
+    //           results.instructions[i].variables[vI].name,
+    //           results.instructions[i].variables[vI].value);
+    // }
 
     int reg = 0;
     switch (results.instructions[i].type)

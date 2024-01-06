@@ -43,7 +43,7 @@ void addToken(char **val, const char *token)
   strcat(*val, token);
 }
 
-void addVariableToInstruction(Instruction *instruction, const char *variable, const char *value)
+void addInstructionVariable(InterpretationResult *result, Instruction *instruction, const char *variable, const char *value)
 {
   char *nameCopy = strdup(variable);
   char *valueCopy = strdup(value);
@@ -51,39 +51,41 @@ void addVariableToInstruction(Instruction *instruction, const char *variable, co
   if (nameCopy == NULL || valueCopy == NULL)
   {
     perror("Failed to allocate memory for strings");
-    free(nameCopy); // Safe to call free on NULL
+    free(nameCopy);
     free(valueCopy);
-    return;
   }
 
-  InstructionVariable *newVariables = realloc(instruction->variables, (instruction->variablesCount + 1) * sizeof(InstructionVariable));
+  InterpretationVariable *newVariables = realloc(result->variables, (result->variablesCount + 1) * sizeof(InterpretationVariable));
+
   if (newVariables == NULL)
   {
     perror("Failed to reallocate memory");
     free(nameCopy);
     free(valueCopy);
-    return;
   }
 
-  instruction->variables = newVariables;
-  InstructionVariable var = {.name = nameCopy, .value = valueCopy};
-  instruction->variables[instruction->variablesCount++] = var;
+  InterpretationVariable var = {
+      .identifier = result->variablesCount,
+      .name = strdup(nameCopy),
+      .initialValue = strdup(valueCopy)};
+
+  newVariables[result->variablesCount] = var;
+  result->variables = newVariables;
+  result->variablesCount++;
 }
 
 void tokenizeLine(char *line, InterpretationResult *result)
 {
+  // Tokenize the first token in the line
   char *token = strtok(line, " ");
   if (token == NULL)
     return;
-
-  // Tokenize the first token in the line
 
   // Ignore comments
   if (strcmp(token, "//") == 0)
     return;
 
-  Instruction instruction = {
-      .variablesCount = 0};
+  Instruction instruction = {};
   determineInstructionTokenType(token, result, &instruction);
 
   int tokenIndex = 0;
@@ -175,11 +177,22 @@ void tokenizeLine(char *line, InterpretationResult *result)
       token = strtok(NULL, " ");
       tokenIndex++;
     }
-    addVariableToInstruction(&instruction, declaredVariableName, declaredVariableValue);
+    addInstructionVariable(result, &instruction, declaredVariableName, declaredVariableValue);
     break;
   }
   }
 
+  Instruction *newInstructions = realloc(result->instructions, (result->instructionsCount + 1) * sizeof(Instruction));
+
+  if (newInstructions == NULL)
+  {
+    fprintf(stderr, "Memory allocation failed\n");
+    free(instruction.library);
+    free(instruction.function);
+    return;
+  }
+
+  result->instructions = newInstructions;
   result->instructions[result->instructionsCount] = instruction;
   result->instructionsCount++;
 }
